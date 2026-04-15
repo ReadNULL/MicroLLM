@@ -96,13 +96,13 @@ flowchart TB
 <summary><strong>目录结构</strong> （点击展开）</summary>
 
 ```
-micro_LM/
-├── microlm/                  # 核心 Python 包
+micro_LLM/
+├── src/                  	   #   核心自实现 Python 包
 │   ├── model/                #   transformer.py, lora.py, kv_cache.py
 │   ├── tokenizer/            #   BPE tokenizer (训练 + 编码/解码)
 │   ├── training/             #   optimizer, scheduler, sft.py, data_loader, loss
 │   └── inference/            #   generate_text.py, prompting.py
-├── scripts/                  # 可执行脚本入口
+├── scripts/                   #   可执行脚本入口
 │   ├── train_pretrain.py     #   预训练
 │   ├── train_sft.py          #   SFT 微调 (支持 --use-lora)
 │   ├── train_qwen_lora.py    #   Qwen LoRA 微调
@@ -112,14 +112,14 @@ micro_LM/
 │   ├── export_final_model.py #   LoRA 合并导出
 │   ├── serve_vllm.sh         #   vLLM 服务启动
 │   └── smoke_vllm.py         #   vLLM 功能验证
-├── tests/                    # 测试套件 (6个测试文件)
-├── configs/                  # 训练/推理配置 JSON
-├── eval/                     # 评测 prompt 模板
-├── results/                  # 评测结果
-├── data/                     # 训练数据 (大部分需自行准备)
-├── Readme/                   # 详细中文文档
-│   ├── 项目全景图/            #   01-06 全景文档
-│   └── 核心代码解析/          #   各模块代码详解
+├── tests/                     #   测试套件 (6个测试文件)
+├── configs/                   #   训练/推理配置 JSON
+├── eval/                      #   评测 prompt 模板
+├── results/                   #   评测结果
+├── data/                      #   训练数据 (大部分需自行准备)
+├── Readme/                    #   详细中文文档
+│   ├── 项目全景图/             #   01-06 全景文档
+│   └── 核心代码解析/           #   各模块代码详解
 └── pyproject.toml
 ```
 
@@ -132,8 +132,8 @@ micro_LM/
 ### 安装
 
 ```bash
-git clone https://github.com/jiaran-king/MicroLM.git
-cd MicroLM
+git clone https://github.com/ReadNULL/MicroLLM.git
+cd src
 python -m venv .venv
 source .venv/bin/activate        # Linux/Mac
 # .venv\Scripts\activate         # Windows
