@@ -97,7 +97,7 @@ flowchart TB
 
 ```
 micro_LLM/
-├── src/                  	   #   核心自实现 Python 包
+├── src/                       #   核心自实现 Python 包
 │   ├── model/                #   transformer.py, lora.py, kv_cache.py
 │   ├── tokenizer/            #   BPE tokenizer (训练 + 编码/解码)
 │   ├── training/             #   optimizer, scheduler, sft.py, data_loader, loss
