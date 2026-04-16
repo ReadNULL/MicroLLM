@@ -1,4 +1,4 @@
-# MicroLM
+# MicroLLM
 
 轻量级 LLM 训练、微调、评测与部署全链路项目。
 
