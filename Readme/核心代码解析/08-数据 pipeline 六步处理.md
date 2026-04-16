@@ -1,6 +1,6 @@
 ---
 type: project-note
-project: MicroLM
+project: MicroLLM
 section: core-code-analysis
 priority: P2
 file: scripts/01~06.py 数据 pipeline（六步处理）

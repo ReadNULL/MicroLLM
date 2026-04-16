@@ -1,9 +1,9 @@
 ---
 type: project-note
-project: MicroLM
+project: MicroLLM
 section: core-code-analysis
 priority: P0
-file: microlm/training/data_loader.py (19行) + loss.py (30行)
+file: src/training/data_loader.py (19行) + loss.py (30行)
 ---
 
 # data_loader.py 与 loss.py — 训练最小闭环

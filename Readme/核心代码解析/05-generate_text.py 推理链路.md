@@ -1,6 +1,6 @@
 ---
 type: project-note
-project: MicroLM
+project: MicroLLM
 section: core-code-analysis
 priority: P1
 file: scripts/generate_text.py (351行)

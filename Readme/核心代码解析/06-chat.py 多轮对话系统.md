@@ -1,6 +1,6 @@
 ---
 type: project-note
-project: MicroLM
+project: MicroLLM
 section: core-code-analysis
 priority: P2
 file: scripts/chat.py (604行)

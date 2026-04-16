@@ -6,13 +6,13 @@
 
 涵盖 tokenizer 训练、语料处理、pretrain、SFT、LoRA、推理优化、评测与部署，每一个环节亲手实现。
 
-[自研链路](#自研链路--31m-参数) · [Qwen 迁移](#迁移链路--qwen25-15b) · [快速开始](#快速开始) · [文档](#详细文档)
+[自研链路](#自研链路 — 31.7M 参数) · [Qwen 迁移](#迁移链路 — Qwen2.5-1.5B-Instruct) · [快速开始](#快速开始) · [文档](#详细文档)
 
 ---
 
 ## 两线并行
 
-| | **自研 MicroLM 链路** | **Qwen 迁移与部署链路** |
+| | **自研 MicroLLM 链路** | **Qwen 迁移与部署链路** |
 |:--:|:---:|:---:|
 | **规模** | 31.7M 参数 | 1.55B 参数 |
 | **技术栈** | 纯 PyTorch（einsum 自实现） | HF / PEFT / vLLM |
@@ -82,7 +82,7 @@ flowchart TB
 | 文档 | 内容 |
 |:---:|:---:|
 | [01-项目总览](Readme/项目全景图/01-项目总览.md) | 双轨架构、核心量化成果一览 |
-| [02-自研 MicroLM 主线](Readme/项目全景图/02-自研%20MicroLM%20主线.md) | 数据处理 / Tokenizer / 模型设计 / Pretrain / SFT / LoRA / 能力边界 |
+| [02-自研 MicroLM 主线](Readme/项目全景图/02-自研%20MicroLLM%20主线.md) | 数据处理 / Tokenizer / 模型设计 / Pretrain / SFT / LoRA / 能力边界 |
 | [03-推理与系统能力增强](Readme/项目全景图/03-推理与系统能力增强.md) | 文本生成流程 / KV Cache 优化与 Benchmark / chat.py 多轮对话 |
 | [04-Qwen 迁移与结构化输出](Readme/项目全景图/04-Qwen%20迁移与结构化输出主线.md) | 迁移动机 / InstructIE 数据 pipeline / Qwen LoRA 微调 / 导出部署 |
 | [05-评测、验证与部署闭环](Readme/项目全景图/05-评测、验证与部署闭环.md) | 通用评测体系 / 结构化自动评测 / Alias 归一化 / vLLM benchmark |
@@ -180,7 +180,7 @@ python -c "from datasets import load_dataset; load_dataset('zjunlp/InstructIE')"
 
 **基座模型**
 
-从 [HuggingFace](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) 下载 `Qwen2.5-1.5B-Instruct` 至项目根目录。
+从 [HuggingFace](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) 下载 `Qwen2.5-1.5B-Instruct` 至项目/model目录下。
 
 > 详细处理流程见 [`data/README.md`](data/README.md)
 

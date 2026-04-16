@@ -1,9 +1,9 @@
 ---
 type: project-note
-project: MicroLM
+project: MicroLLM
 section: core-code-analysis
 priority: P0
-file: microlm/training/sft.py (218行)
+file: src/training/sft.py (218行)
 ---
 
 # sft.py — SFT 数据协议

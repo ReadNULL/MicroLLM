@@ -1,6 +1,6 @@
 ---
 type: project-note
-project: MicroLM
+project: MicroLLM
 section: core-code-analysis
 priority: P1
 file: scripts/train_qwen_lora.py (376行)
@@ -158,7 +158,7 @@ print_trainable_params(model)
 | Adaptor 存储 | **8.3 MB**（vs 基座 2,944 MB）|
 | 存储节省 | **99.7%** |
 
-比 MicroLM 的 0.83% 更高效——因为基座更大（1.55B vs 31.7M），同样的 r=8 注入的绝对参数量更大，但占总参数比例更低。
+比 MicroLLM 的 0.83% 更高效——因为基座更大（1.55B vs 31.7M），同样的 r=8 注入的绝对参数量更大，但占总参数比例更低。
 
 ### 3. 训练循环（L289-350）
 

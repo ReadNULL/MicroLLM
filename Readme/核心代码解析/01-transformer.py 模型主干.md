@@ -1,9 +1,9 @@
 ---
 type: project-note
-project: MicroLM
+project: MicroLLM
 section: core-code-analysis
 priority: P0
-file: microlm/model/transformer.py (416行)
+file: src/model/transformer.py (416行)
 ---
 
 # transformer.py — 自研模型主干
