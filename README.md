@@ -6,7 +6,7 @@
 
 涵盖 tokenizer 训练、语料处理、pretrain、SFT、LoRA、推理优化、评测与部署，每一个环节亲手实现。
 
-[自研链路](#自研链路 — 31.7M 参数) · [Qwen 迁移](#迁移链路 — Qwen2.5-1.5B-Instruct) · [快速开始](#快速开始) · [文档](#详细文档)
+[核心特色：自研链路 + Qwen 迁移](#核心成果 )· [目录结构](#目录结构) · [快速开始](#快速开始) · [文档](#详细文档)
 
 ---
 
@@ -50,7 +50,7 @@ flowchart TB
 
 ## 核心成果
 
-### 自研链路 — 31.7M 参数
+### 自研链路
 
 | 指标 | 数值 |
 |:---:|:---:|
@@ -61,7 +61,7 @@ flowchart TB
 | SFT 质量提升 | 评分 **+81%**（1.13 → 2.04 / 满分 5） |
 | LoRA vs 全参 | 生成质量达全参 **85%**（val_loss 差距仅 9%） |
 
-### 迁移链路 — Qwen2.5-1.5B-Instruct
+### 迁移链路
 
 | 指标 | 数值 |
 |:---:|:---:|
@@ -75,22 +75,7 @@ flowchart TB
 
 ---
 
-## 详细文档
-
-完整中文文档位于 [`Readme/`](Readme/) 目录：
-
-| 文档 | 内容 |
-|:---:|:---:|
-| [01-项目总览](Readme/项目全景图/01-项目总览.md) | 双轨架构、核心量化成果一览 |
-| [02-自研 MicroLM 主线](Readme/项目全景图/02-自研%20MicroLLM%20主线.md) | 数据处理 / Tokenizer / 模型设计 / Pretrain / SFT / LoRA / 能力边界 |
-| [03-推理与系统能力增强](Readme/项目全景图/03-推理与系统能力增强.md) | 文本生成流程 / KV Cache 优化与 Benchmark / chat.py 多轮对话 |
-| [04-Qwen 迁移与结构化输出](Readme/项目全景图/04-Qwen%20迁移与结构化输出主线.md) | 迁移动机 / InstructIE 数据 pipeline / Qwen LoRA 微调 / 导出部署 |
-| [05-评测、验证与部署闭环](Readme/项目全景图/05-评测、验证与部署闭环.md) | 通用评测体系 / 结构化自动评测 / Alias 归一化 / vLLM benchmark |
-| [06-项目复盘与总结](Readme/项目全景图/06-项目复盘与总结.md) | 关键成果 / 8 个 Bug 清册 / 方法论收获 / 扩展方向 |
-
-> 核心代码解析：[transformer.py](Readme/核心代码解析/01-transformer.py%20模型主干.md) · [lora.py](Readme/核心代码解析/02-lora.py%20LoRA%20参数高效微调.md) · [sft.py](Readme/核心代码解析/03-sft.py%20SFT%20数据协议.md) · [data_loader & loss](Readme/核心代码解析/04-data_loader.py%20与%20loss.py.md) · [generate_text.py](Readme/核心代码解析/05-generate_text.py%20推理链路.md) · [chat.py](Readme/核心代码解析/06-chat.py%20多轮对话系统.md) · [train_qwen_lora.py](Readme/核心代码解析/07-train_qwen_lora.py%20Qwen%20迁移线核心.md) · [数据 pipeline 六步处理](Readme/核心代码解析/08-数据%20pipeline%20六步处理.md)
-
----
+## 目录结构
 
 <details>
 <summary><strong>目录结构</strong> （点击展开）</summary>
@@ -187,6 +172,24 @@ python -c "from datasets import load_dataset; load_dataset('zjunlp/InstructIE')"
 </details>
 
 ---
+
+
+## 详细文档
+
+完整中文文档位于 [`Readme/`](Readme/) 目录：
+
+| 文档 | 内容 |
+|:---:|:---:|
+| [01-项目总览](Readme/项目全景图/01-项目总览.md) | 双轨架构、核心量化成果一览 |
+| [02-自研 MicroLM 主线](Readme/项目全景图/02-自研%20MicroLLM%20主线.md) | 数据处理 / Tokenizer / 模型设计 / Pretrain / SFT / LoRA / 能力边界 |
+| [03-推理与系统能力增强](Readme/项目全景图/03-推理与系统能力增强.md) | 文本生成流程 / KV Cache 优化与 Benchmark / chat.py 多轮对话 |
+| [04-Qwen 迁移与结构化输出](Readme/项目全景图/04-Qwen%20迁移与结构化输出主线.md) | 迁移动机 / InstructIE 数据 pipeline / Qwen LoRA 微调 / 导出部署 |
+| [05-评测、验证与部署闭环](Readme/项目全景图/05-评测、验证与部署闭环.md) | 通用评测体系 / 结构化自动评测 / Alias 归一化 / vLLM benchmark |
+| [06-项目复盘与总结](Readme/项目全景图/06-项目复盘与总结.md) | 关键成果 / 8 个 Bug 清册 / 方法论收获 / 扩展方向 |
+
+> 核心代码解析：[transformer.py](Readme/核心代码解析/01-transformer.py%20模型主干.md) · [lora.py](Readme/核心代码解析/02-lora.py%20LoRA%20参数高效微调.md) · [sft.py](Readme/核心代码解析/03-sft.py%20SFT%20数据协议.md) · [data_loader & loss](Readme/核心代码解析/04-data_loader.py%20与%20loss.py.md) · [generate_text.py](Readme/核心代码解析/05-generate_text.py%20推理链路.md) · [chat.py](Readme/核心代码解析/06-chat.py%20多轮对话系统.md) · [train_qwen_lora.py](Readme/核心代码解析/07-train_qwen_lora.py%20Qwen%20迁移线核心.md) · [数据 pipeline 六步处理](Readme/核心代码解析/08-数据%20pipeline%20六步处理.md)
+
+----
 
 ## License
 
