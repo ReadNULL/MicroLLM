@@ -206,46 +206,55 @@ class KVCache:
 
 class MultiHeadAttention(nn.Module):
     def __init__(self,
-            d_model: int,
-            num_heads: int,
-            max_seq_len: int | None = None,
-            theta: float = None,
-            device=None,
-            dtype=None):
+                 d_model: int,
+                 num_heads: int,
+                 max_seq_len: int | None = None,
+                 theta: float = None,
+                 device=None,
+                 dtype=None):
         super().__init__()
         if d_model % num_heads != 0:
             raise ValueError("d_model must be divisible by num_heads")
         self.num_heads = num_heads
         self.d_model = d_model
         self.d_k = d_model // num_heads
-        # qkv聚合计算
-        self.qkv_proj = Linear(d_model, 3 * d_model, device=device, dtype=dtype)
+
+        self.q_proj = Linear(d_model, d_model, device=device, dtype=dtype)
+        self.k_proj = Linear(d_model, d_model, device=device, dtype=dtype)
+        self.v_proj = Linear(d_model, d_model, device=device, dtype=dtype)
         self.out_proj = Linear(d_model, d_model, device=device, dtype=dtype)
+
         self.rope = None
         if theta is not None and max_seq_len is not None:
             self.rope = RoPE(theta=theta, d_k=self.d_k, max_seq_len=max_seq_len, device=device)
 
-    def forward(self, x, token_positions = None, past_k = None, past_v = None, use_cache = False):
+    def forward(
+            self,
+            x: torch.Tensor,
+            token_positions: torch.Tensor | None = None,
+            past_k: torch.Tensor | None = None,
+            past_v: torch.Tensor | None = None,
+            use_cache: bool = False,
+    ):
         seq_len = x.shape[-2]
         leading_shape = x.shape[:-2]
-        # Q, K, V投影 + 拆头
-        # 性能优化，qkv放在一起计算最后拆分
-        qkv = self.qkv_proj(x)
-        q, k, v = rearrange(qkv, 'b s (three h d) -> three b h s d',
-                            three=3, h=self.num_heads, d=self.d_k)
 
-        # RoPE位置编码
+        q = rearrange(self.q_proj(x), "... seq (head d) -> ... head seq d", head=self.num_heads)
+        k = rearrange(self.k_proj(x), "... seq (head d) -> ... head seq d", head=self.num_heads)
+        v = rearrange(self.v_proj(x), "... seq (head d) -> ... head seq d", head=self.num_heads)
+
+        # RoPE 位置编码
         if self.rope is not None:
             if token_positions is None:
                 token_positions = torch.arange(seq_len, device=x.device)
-                # 扩展维度以匹配 q 的维度
-                for _ in range(q.ndim - token_positions.ndim):
-                    token_positions = token_positions.unsqueeze(0)
-                token_positions = token_positions.expand(*q.shape[:-1])
+                # 高效扩展维度
+                token_positions = token_positions.view(
+                    *([1] * len(leading_shape)), seq_len
+                ).expand(*leading_shape, seq_len)
             q = self.rope(q, token_positions)
             k = self.rope(k, token_positions)
 
-        # KV Cache分支 & 标准分支
+        # KV Cache 处理
         if use_cache:
             if past_k is not None:
                 k = torch.cat([past_k, k], dim=-2)
@@ -253,12 +262,14 @@ class MultiHeadAttention(nn.Module):
             attn_out = scaled_dot_product_attention(q, k, v, mask=None)
             new_k, new_v = k, v
         else:
-            casual_mask = torch.tril(torch.ones((seq_len, seq_len), device=x.device, dtype=torch.bool))
-            attn_out = scaled_dot_product_attention(q, k, v, mask=casual_mask)
+            causal_mask = torch.tril(torch.ones((seq_len, seq_len), device=x.device, dtype=torch.bool))
+            attn_out = scaled_dot_product_attention(q, k, v, mask=causal_mask)
             new_k, new_v = None, None
 
+        # 合并头维度
         attn_out = rearrange(attn_out, "... head seq d -> ... seq (head d)")
         out = self.out_proj(attn_out)
+
         return out, new_k, new_v
 
 class Identity(nn.Module):
