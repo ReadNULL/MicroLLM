@@ -125,11 +125,12 @@ def maybe_add_system_prompt(conversations, rng, system_prompt_ratio,
 ### 4. render_chat_prompt（L73-92）
 
 ```python
-def render_chat_prompt(conversations, eos_token="
-
-
-", add_generation_prompt=False):
-    parts = []
+def render_chat_prompt(
+    conversations: list[dict[str, str]],
+    eos_token: str = "<|endoftext|>",
+    add_generation_prompt: bool = False,
+) -> str:
+    parts: list[str] = []
     for message in conversations:
         role = message["role"]
         content = message["content"]
@@ -137,11 +138,11 @@ def render_chat_prompt(conversations, eos_token="
         parts.append(content)
         parts.append("\n")
         if role == "assistant":
-            parts.append(eos_token)       # assistant 回复后接 EOS
+            parts.append(eos_token)
             parts.append("\n")
 
     if add_generation_prompt:
-        parts.append(ROLE_MARKERS["assistant"])  # 推理时末尾补 assistant 标记
+        parts.append(ROLE_MARKERS["assistant"])
 
     return "".join(parts)
 ```
@@ -204,9 +205,7 @@ labels:
 | ① | 全部初始化 -100 | PyTorch 的 cross_entropy 忽略 -100 位置 |
 | ② | 在 input_ids 中搜索 `assistant` 标记的 token 序列 | 定位回答区间起点 |
 | ③ | 起点 = 标记长度之后 | 排除标记本身 |
-| ④ | 搜索 EOS 边界 (`"\n
-
-"`) | 定位回答区间终点 |
+| ④ | 搜索 EOS 边界 (`"\n"`) | 定位回答区间终点 |
 | ⑤ | 区间内非 pad 位置赋值真实 token ID | 让这些位置参与 loss |
 
 支持多轮对话：while 循环会找到所有 assistant 区间并分别标注。
