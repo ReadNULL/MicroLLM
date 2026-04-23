@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from microlm.training import build_generation_prompt
+from src.training.sft import build_generation_prompt
 
 
 def _normalize_conversations(raw_conversations: object) -> list[dict[str, str]]:
