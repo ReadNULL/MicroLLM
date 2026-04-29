@@ -19,9 +19,11 @@ qwen = [
     "datasets>=2.18",
     "requests>=2.31",
 ]
+
 dev = [
     "pytest>=8.3.4",
 ]
+
 all = [
     "microllm[qwen]",
     "microllm[dev]",
