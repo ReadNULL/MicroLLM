@@ -81,7 +81,7 @@ flowchart TB
 <summary><strong>目录结构</strong> （点击展开）</summary>
 
 ```
-microLLM/
+MicroLLM/
 ├── src/                       #   核心自实现 Python 包
 │   ├── model/                #   transformer.py, lora.py, kv_cache.py
 │   ├── tokenizer/            #   BPE tokenizer (训练 + 编码/解码)
@@ -105,6 +105,7 @@ microLLM/
 ├── Readme/                    #   详细中文文档
 │   ├── 项目全景图/             #   01-06 全景文档
 │   └── 核心代码解析/           #   各模块代码详解
+├── README.md
 └── pyproject.toml
 ```
 
@@ -181,7 +182,7 @@ python -c "from datasets import load_dataset; load_dataset('zjunlp/InstructIE')"
 | 文档 | 内容 |
 |:---:|:---:|
 | [01-项目总览](Readme/项目全景图/01-项目总览.md) | 双轨架构、核心量化成果一览 |
-| [02-自研 MicroLM 主线](Readme/项目全景图/02-自研%20MicroLLM%20主线.md) | 数据处理 / Tokenizer / 模型设计 / Pretrain / SFT / LoRA / 能力边界 |
+| [02-自研 MicroLLM 主线](Readme/项目全景图/02-自研%20MicroLLM%20主线.md) | 数据处理 / Tokenizer / 模型设计 / Pretrain / SFT / LoRA / 能力边界 |
 | [03-推理与系统能力增强](Readme/项目全景图/03-推理与系统能力增强.md) | 文本生成流程 / KV Cache 优化与 Benchmark / chat.py 多轮对话 |
 | [04-Qwen 迁移与结构化输出](Readme/项目全景图/04-Qwen%20迁移与结构化输出主线.md) | 迁移动机 / InstructIE 数据 pipeline / Qwen LoRA 微调 / 导出部署 |
 | [05-评测、验证与部署闭环](Readme/项目全景图/05-评测、验证与部署闭环.md) | 通用评测体系 / 结构化自动评测 / Alias 归一化 / vLLM benchmark |
