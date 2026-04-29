@@ -4,7 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
-from microlm.tokenizer import save_tokenizer_files, train_bpe
+from src.tokenizer import save_tokenizer_files, train_bpe
 
 
 def load_config_defaults(config_path: str | None) -> dict[str, object]:

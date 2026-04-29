@@ -34,9 +34,9 @@ from pathlib import Path
 
 import torch
 
-from microlm.model import TransformerLM, apply_lora_to_model, load_lora_state_dict, merge_lora
-from microlm.tokenizer import BPETokenizer
-from microlm.training.sft import ROLE_MARKERS
+from src.model import TransformerLM, apply_lora_to_model, load_lora_state_dict, merge_lora
+from src.tokenizer import BPETokenizer
+from src.training.sft import ROLE_MARKERS
 
 
 def _remove_surrogates(text: str) -> str:

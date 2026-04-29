@@ -6,13 +6,13 @@ import torch
 import numpy as np
 import wandb
 
-from microlm.model import TransformerLM
-from microlm.training import AdamW
-from microlm.training import gradient_clipping as clip_gradient_norm
-from microlm.training import learning_rate_schedule as get_lr_cosine_schedule
-from microlm.training import get_batch
-from microlm.training import save_checkpoint, load_checkpoint
-from microlm.training import cross_entropy
+from src.model import TransformerLM
+from src.training import AdamW
+from src.training import gradient_clipping as clip_gradient_norm
+from src.training import learning_rate_schedule as get_lr_cosine_schedule
+from src.training import get_batch
+from src.training import save_checkpoint, load_checkpoint
+from src.training import cross_entropy
 
 def load_config_defaults(config_path: str | None) -> dict[str, object]:
     if config_path is None:

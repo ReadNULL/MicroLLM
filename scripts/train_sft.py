@@ -9,18 +9,18 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from microlm.model import TransformerLM
-from microlm.model.lora import (
+from src.model import TransformerLM
+from src.model.lora import (
     apply_lora_to_model,
     get_lora_params,
     get_lora_state_dict,
     load_lora_state_dict,
     print_trainable_params,
 )
-from microlm.tokenizer import BPETokenizer
-from microlm.training import AdamW
-from microlm.training import SFTDataset
-from microlm.training import load_model_state, load_checkpoint, masked_cross_entropy, save_checkpoint
+from src.tokenizer import BPETokenizer
+from src.training import AdamW
+from src.training import SFTDataset
+from src.training import load_model_state, load_checkpoint, masked_cross_entropy, save_checkpoint
 
 
 def load_config_defaults(config_path: str | None) -> dict[str, object]:

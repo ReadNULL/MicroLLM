@@ -1,4 +1,8 @@
-"""
+import regex as re
+from collections.abc import Iterable
+import json
+from .bpe import bytes_to_unicode
+'''
 __init__:
 传入初始参数 merge vocab special_tokens
 构造 id_to_vocab vocab_to_id 以及merge_id词典
@@ -18,43 +22,38 @@ gpt2预分词 将整段字符串切分成单个单词
 decoder:
 id_to_vocab
 合并
-"""
-import json
-from collections.abc import Iterable
-
-import regex as re
-from .bpe import byte_to_unicode
+'''
 
 class BPETokenizer:
-    def __init__(self, merges: list[tuple[bytes, bytes]], vocab: dict[int, bytes], special_tokens: list[str]|None=None):
+    def __init__(self, vocab: dict[int, bytes], merges: list[tuple[bytes, bytes]],  special_tokens:list[str]|None=None):
         self.id_to_vocab = dict(vocab)
         self.vocab_to_id = {v: id for id, v in self.id_to_vocab.items()}
         self.merges_id = {m: id for id, m in enumerate(merges)}
         self.special_tokens = special_tokens or []
 
-        # 将特殊token注册到词表中
-        next_id = max(self.id_to_vocab.keys()) + 1 if self.special_tokens else 0
-        for token in self.special_tokens:
-            token_bytes = token.encode("utf-8")
-            if token_bytes not in self.vocab_to_id:
-                self.vocab_to_id[token_bytes] = next_id
-                self.id_to_vocab[next_id] = token_bytes
+        # Register special tokens into vocab with new IDs (starting after last BPE token)
+        next_id = max(self.id_to_vocab.keys()) + 1 if self.id_to_vocab else 0
+        for tok in self.special_tokens:
+            tok_bytes = tok.encode("utf-8")
+            if tok_bytes not in self.vocab_to_id:
+                self.id_to_vocab[next_id] = tok_bytes
+                self.vocab_to_id[tok_bytes] = next_id
                 next_id += 1
 
         if self.special_tokens:
-            sorted_special_tokens = sorted(self.special_tokens, key=len, reverse=True)
-            special_regex = "|".join(re.escape(t) for t in sorted_special_tokens)
+            sorted_special = sorted(self.special_tokens, key=len, reverse=True)
+            special_regex = "|".join(re.escape(t) for t in sorted_special)
             self.special_regex = re.compile(special_regex)
         else:
             self.special_regex = None
         self.gpt2_pat = re.compile(r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
-
+    
     @classmethod
-    def from_files(cls, vocal_filepath: str, merges_filepath: str, special_tokens: list[str]|None=None):
-        with open(vocal_filepath, "r", encoding="utf-8") as f:
+    def from_files(cls, vocab_filepath: str, merges_filepath: str, special_tokens: list[str] | None = None):
+        with open(vocab_filepath, "r", encoding="utf-8") as f:
             raw_vocab = json.load(f)
 
-        byte_decoder = {v: k for k, v in byte_to_unicode().items()}
+        byte_decoder = {v: k for k, v in bytes_to_unicode().items()}
 
         if not raw_vocab:
             vocab_items: list[tuple[int, str]] = []
@@ -78,15 +77,16 @@ class BPETokenizer:
                     merges.append(
                         (
                             bytes(byte_decoder[ch] for ch in parts[0]),
-                            bytes(byte_decoder[ch] for ch in parts[1])
+                            bytes(byte_decoder[ch] for ch in parts[1]),
                         )
                     )
-        return cls(merges=merges, vocab=vocab, special_tokens=special_tokens)
 
-    def encode(self, text) -> list[int]:
+        return cls(vocab, merges, special_tokens)
+
+    def encode(self, text)->list[int]:
         if not text:
             return []
-        if self.special_regex is None:
+        if self.special_regex == None:
             return self._encode_text_segment(text)
         tokens = []
         last_pos = 0
@@ -102,60 +102,59 @@ class BPETokenizer:
             tokens.extend(self._encode_text_segment(text[last_pos:]))
         return tokens
 
-    def _encode_text_segment(self, text: str) -> list[int]:
+    def _encode_text_segment(self, text:str)-> list[int]:
         ids = []
         pre_tokens = self.gpt2_pat.findall(text)
         for word in pre_tokens:
             tokens = [bytes([b]) for b in word.encode("utf-8")]
-            while len(tokens) > 1:
+            while(len(tokens) > 1):
                 best_pair = None
                 best_id = float("inf")
-                for i in range(len(tokens) - 1):
-                    pair = (tokens[i], tokens[i + 1])
+                for i in range(len(tokens)-1):
+                    pair = (tokens[i], tokens[i+1])
                     if pair in self.merges_id and self.merges_id[pair] < best_id:
                         best_pair = pair
                         best_id = self.merges_id[pair]
-                if best_pair is None:
+                if best_pair == None:
                     break
                 i = 0
                 new_tokens = []
-                while i < len(tokens):
-                    if i < len(tokens) - 1 and (tokens[i], tokens[i + 1]) == best_pair:
+                while(i<len(tokens)):
+                    if i<len(tokens) -1 and (tokens[i], tokens[i+1]) == best_pair:
                         new_tokens.append(best_pair[0] + best_pair[1])
-                        i += 2
+                        i+=2
                     else:
                         new_tokens.append(tokens[i])
-                        i += 1
+                        i+=1
                 tokens = new_tokens
             for t in tokens:
                 ids.append(self.vocab_to_id[t])
         return ids
-
-    def decode(self, ids: list[int]) -> str:
+    
+    def decode(self, ids:list[int]) ->str:
         byte_segments = [self.id_to_vocab[i] for i in ids]
         full_bytes = b"".join(byte_segments)
         return full_bytes.decode("utf-8", errors="replace")
-
+    
     def encode_iterable(self, iterable: Iterable[str]) -> Iterable[int]:
         buffer = ""
         for chunk in iterable:
             buffer += chunk
-
+            
             # 寻找安全的截断边界：优先寻找最后一个换行符，其次寻找最后一个空格
             # GPT-2 的正则天然会在换行符或空格处进行切分，因此在这里截断是绝对安全的
             safe_idx = max(buffer.rfind('\n'), buffer.rfind(' '))
-
+            
             # 如果找到了安全边界
             if safe_idx != -1:
                 # 截取从开头到安全边界（包含边界字符本身）的文本
                 safe_text = buffer[:safe_idx + 1]
                 # 对安全文本进行编码，并通过 yield from 逐个产出 token ID
                 yield from self.encode(safe_text)
-
+                
                 # 将剩下未处理的“尾巴”重新赋值给 buffer，等待与下一个 chunk 拼接
                 buffer = buffer[safe_idx + 1:]
-
+                
         # 当整个 iterable 被遍历完后，如果 buffer 里还有残留的文本，进行最后一次编码
         if buffer:
             yield from self.encode(buffer)
-

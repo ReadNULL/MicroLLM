@@ -6,7 +6,7 @@ with unified detection: JSON parseable, missing fields, hallucinated fields, str
 
 Usage:
     python scripts/run_instructie_eval.py --config configs/instructie_eval.json
-    python scripts/run_instructie_eval.py --skip-microlm   # Qwen models only
+    python scripts/run_instructie_eval.py --skip-src   # Qwen models only
     python scripts/run_instructie_eval.py --skip-qwen      # MicroLM models only
 """
 from __future__ import annotations
@@ -336,9 +336,9 @@ def load_microlm_model(
 ):
     """Load a MicroLM model (optionally with LoRA). Returns (model, tokenizer, eos_token_id)."""
     import torch.nn as nn
-    from microlm.model import TransformerLM
-    from microlm.model.lora import load_lora_state_dict, merge_lora
-    from microlm.tokenizer import BPETokenizer
+    from src.model import TransformerLM
+    from src.model.lora import load_lora_state_dict, merge_lora
+    from src.tokenizer import BPETokenizer
 
     special_tokens = ["</s>"]
     tokenizer = BPETokenizer.from_files(
@@ -397,7 +397,7 @@ def load_microlm_model(
         model.lm_head.weight = nn.Parameter(new_head)
 
     if lora_adaptor_path is not None and lora_adaptor_path.exists():
-        from microlm.model.lora import apply_lora_to_model
+        from src.model.lora import apply_lora_to_model
         apply_lora_to_model(model, r=8, alpha=16.0)
         lora_sd = torch.load(lora_adaptor_path, map_location=device, weights_only=True)
         load_lora_state_dict(model, lora_sd)
@@ -590,8 +590,8 @@ def run_evaluation(
         models_to_eval.append(("qwen_lora", "qwen", qwen_adaptor_path))
 
     if not skip_microlm:
-        models_to_eval.append(("microlm_sft", "microlm", None))
-        models_to_eval.append(("microlm_lora", "microlm", microlm_lora_adaptor))
+        models_to_eval.append(("microlm_sft", "src", None))
+        models_to_eval.append(("microlm_lora", "src", microlm_lora_adaptor))
 
     for model_name, backend, adaptor in models_to_eval:
         print(f"\n{'='*60}")
@@ -798,13 +798,13 @@ def parse_args():
     parser.add_argument("--eval-file", type=Path, default=Path("eval/prompts_instructie.json"))
     parser.add_argument("--out-dir", type=Path, default=Path("results/instructie_eval"))
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
-    parser.add_argument("--skip-microlm", action="store_true", help="Skip MicroLM models")
+    parser.add_argument("--skip-src", action="store_true", help="Skip MicroLM models")
     parser.add_argument("--skip-qwen", action="store_true", help="Skip Qwen models")
     parser.add_argument("--qwen-base-path", type=str, default="./Qwen2.5-1.5B-Instruct")
     parser.add_argument("--qwen-adaptor-path", type=str, default="./outputs/qwen_lora/best_adaptor")
-    parser.add_argument("--microlm-sft-path", type=str, default="./outputs/sft_baseline/ckpt_final.pt")
-    parser.add_argument("--microlm-lora-path", type=str, default="./outputs/sft_lora/ckpt_final.pt")
-    parser.add_argument("--microlm-lora-adaptor", type=str, default="./outputs/sft_lora/lora_adaptor.pt")
+    parser.add_argument("--src-sft-path", type=str, default="./outputs/sft_baseline/ckpt_final.pt")
+    parser.add_argument("--src-lora-path", type=str, default="./outputs/sft_lora/ckpt_final.pt")
+    parser.add_argument("--src-lora-adaptor", type=str, default="./outputs/sft_lora/lora_adaptor.pt")
     parser.add_argument("--vocab-path", type=str, default="./outputs/tokenizer_full_clean/vocab.json")
     parser.add_argument("--merges-path", type=str, default="./outputs/tokenizer_full_clean/merge.txt")
     parser.add_argument("--limit", type=int, default=0, help="Limit number of prompts (0 = all)")

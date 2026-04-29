@@ -7,9 +7,9 @@ from pathlib import Path
 
 import torch
 
-from microlm.model import TransformerLM
-from microlm.inference import resolve_generation_prompt
-from microlm.tokenizer import BPETokenizer
+from src.model import TransformerLM
+from src.inference import resolve_generation_prompt
+from src.tokenizer import BPETokenizer
 
 
 def parse_args() -> argparse.Namespace:

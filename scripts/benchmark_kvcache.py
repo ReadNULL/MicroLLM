@@ -20,9 +20,9 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
-from microlm.model import TransformerLM
-from microlm.model.transformer import KVCache
-from microlm.tokenizer import BPETokenizer
+from src.model import TransformerLM
+from src.model.transformer import KVCache
+from src.tokenizer import BPETokenizer
 
 
 def parse_args() -> argparse.Namespace:

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import numpy as np
 
-from microlm.tokenizer import BPETokenizer
+from src.tokenizer import BPETokenizer
 
 
 def load_config_defaults(config_path: str | None) -> dict[str, object]:

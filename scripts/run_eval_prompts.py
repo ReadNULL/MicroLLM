@@ -17,10 +17,10 @@ from pathlib import Path
 
 import torch
 
-from microlm.model import TransformerLM
-from microlm.model.lora import load_lora_state_dict, merge_lora
-from microlm.tokenizer import BPETokenizer
-from microlm.training import build_generation_prompt
+from src.model import TransformerLM
+from src.model.lora import load_lora_state_dict, merge_lora
+from src.tokenizer import BPETokenizer
+from src.training import build_generation_prompt
 
 
 def parse_args() -> argparse.Namespace:
@@ -118,7 +118,7 @@ def load_model(
         print(f"  Resized vocab: {ckpt_vocab_size} -> {tokenizer_vocab}")
 
     if lora_adaptor_path is not None and lora_adaptor_path.exists():
-        from microlm.model.lora import apply_lora_to_model
+        from src.model.lora import apply_lora_to_model
         apply_lora_to_model(model, r=8, alpha=16.0)
         lora_sd = torch.load(lora_adaptor_path, map_location=device, weights_only=True)
         load_lora_state_dict(model, lora_sd)
