@@ -81,7 +81,7 @@ flowchart TB
 <summary><strong>目录结构</strong> （点击展开）</summary>
 
 ```
-micro_LLM/
+microLLM/
 ├── src/                       #   核心自实现 Python 包
 │   ├── model/                #   transformer.py, lora.py, kv_cache.py
 │   ├── tokenizer/            #   BPE tokenizer (训练 + 编码/解码)
