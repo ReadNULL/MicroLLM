@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from microlm.tokenizer import BPETokenizer, save_tokenizer_files, train_bpe
-from microlm.training import SFTDataset, build_generation_prompt, render_chat_prompt
+from src.tokenizer import BPETokenizer, save_tokenizer_files, train_bpe
+from src.training import SFTDataset, build_generation_prompt, render_chat_prompt
 
 
 def build_tokenizer(tmp_path: Path) -> BPETokenizer:

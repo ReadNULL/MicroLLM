@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from microlm.inference import load_conversations_from_json, load_conversations_from_path, resolve_generation_prompt
+from src.inference import load_conversations_from_json, load_conversations_from_path, resolve_generation_prompt
 
 
 def test_resolve_generation_prompt_from_conversations_json() -> None:

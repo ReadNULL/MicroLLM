@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from microlm.tokenizer import BPETokenizer, save_tokenizer_files, train_bpe
+from src.tokenizer import BPETokenizer, save_tokenizer_files, train_bpe
 
 
 def build_tokenizer(tmp_path: Path) -> BPETokenizer:

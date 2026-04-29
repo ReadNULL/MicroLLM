@@ -23,8 +23,8 @@ dev = [
     "pytest>=8.3.4",
 ]
 all = [
-    "microlm[qwen]",
-    "microlm[dev]",
+    "microllm[qwen]",
+    "microllm[dev]",
 ]
 
 [build-system]

@@ -5,7 +5,7 @@ import math
 import torch
 import torch.nn.functional as F
 
-from microlm.model import Linear, RMSNorm, TransformerLM, scaled_dot_product_attention, silu
+from src.model import Linear, RMSNorm, TransformerLM, scaled_dot_product_attention, silu
 
 
 def test_linear_matches_manual_einsum() -> None:

@@ -1,10 +1,10 @@
-"""Tests for microlm.model.lora — LoRA module."""
+"""Tests for src.model.lora — LoRA module."""
 
 import torch
 import pytest
 
-from microlm.model.transformer import Linear, TransformerLM
-from microlm.model.lora import (
+from src.model.transformer import Linear, TransformerLM
+from src.model.lora import (
     LoRALinear,
     apply_lora_to_model,
     get_lora_params,

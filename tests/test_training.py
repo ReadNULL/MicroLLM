@@ -6,8 +6,8 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from microlm.model import TransformerLM
-from microlm.training import AdamW, get_batch, learning_rate_schedule, load_checkpoint, save_checkpoint
+from src.model import TransformerLM
+from src.training import AdamW, get_batch, learning_rate_schedule, load_checkpoint, save_checkpoint
 
 
 def test_learning_rate_schedule_matches_reference_values() -> None:
