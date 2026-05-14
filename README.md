@@ -209,7 +209,7 @@ python -c "from datasets import load_dataset; load_dataset('zjunlp/InstructIE')"
 - [ ] **权重合并与导出**：训练完成后，将 DPO 阶段的 LoRA 权重与 Base 模型合并，通过 `scripts/export_final_model.py` 导出最终版本。
 - [ ] **推理无缝接入**：使用 `generate_text.py` 和 VLLM 部署脚本 (`scripts/serve_vllm.sh`) 对最终的 RL 模型进行性能和稳定性基准测试 (Benchmark)。
 
-—–
+---
 
 ## 详细文档
 
