@@ -1,0 +1,2 @@
+{"prompt": [{"role": "user", "content": "What is the capital of France?"}], "chosen": [{"role": "assistant", "content": "The capital of France is Paris."}], "rejected": [{"role": "assistant", "content": "I think it might be London."}]}
+{"prompt": [{"role": "user", "content": "Explain gravity briefly."}], "chosen": [{"role": "assistant", "content": "Gravity is a force of attraction between objects with mass."}], "rejected": [{"role": "assistant", "content": "Gravity is when things fall down because of magnets."}]}

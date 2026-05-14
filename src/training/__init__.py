@@ -1,5 +1,7 @@
 from .checkpoint import load_checkpoint, load_model_state, save_checkpoint
 from .data_loader import get_batch
+from .dpo import dpo_loss, compute_token_logps
+from .dpo_dataset import DPODataset
 from .gradient import gradient_clipping
 from .loss import cross_entropy, masked_cross_entropy
 from .optimizer import AdamW
