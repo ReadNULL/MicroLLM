@@ -4,14 +4,9 @@
 
 ## 从零搭建一个能训练、能微调、能推理的完整 LLM 链路
 
-涵盖 tokenizer 训练、语料处理、pretrain、SFT、LoRA、推理优化、评测与部署，每一个环节亲手实现。
+涵盖 tokenizer 训练、语料处理、pretrain、SFT、DPO强化学习、LoRA、推理优化、评测与部署，每一个环节亲手实现。
 
-```text
-预训练 -> SFT -> 强化学习
-  √      √     [进行中]
-```
-
-[核心特色：自研链路 + Qwen 迁移](#核心成果 ) · [目录结构](#目录结构) · [快速开始](#快速开始)  · [后续计划](#后续计划) · [文档](#详细文档)
+[核心特色：自研链路 + Qwen 迁移](#核心成果 ) · [目录结构](#目录结构) · [快速开始](#快速开始) · [文档](#详细文档)
 
 ---
 
@@ -22,7 +17,7 @@
 | **规模** | 31.7M 参数 | 1.55B 参数 |
 | **技术栈** | 纯 PyTorch（einsum 自实现） | HF / PEFT / vLLM |
 | **数据源** | MiniMind ~141 万条 | InstructIE 171K 条 |
-| **核心能力** | Tokenizer → Pretrain → SFT → LoRA → KV Cache 推理 | 数据 Pipeline → LoRA 微调 → 自动评测 → 服务化部署 |
+| **核心能力** | Tokenizer → Pretrain → SFT → DPO → LoRA → KV Cache 推理 | 数据 Pipeline → LoRA 微调 → 自动评测 → 服务化部署 |
 | **LoRA 效率** | **0.83%** 可训练参数（1.0 MB） | **0.14%** 可训练参数（8.3 MB） |
 
 ```mermaid
@@ -35,8 +30,9 @@ flowchart TB
     A2 --> A3["BPE Tokenizer<br/>vocab=6400"]
     A3 --> A4["Pretrain<br/>8层 RoPE+SwiGLU"]
     A4 --> A5["SFT / LoRA 微调<br/>0.83% 参数"]
-    A5 --> A6["KV Cache 推理<br/>加速 3.86x"]
-    A6 --> A7["强化学习DPO<br/>[正在进行中...]"]
+    A5 --> A5b["DPO 强化学习<br/>偏好对齐"]
+    A5b --> A6["KV Cache 推理<br/>加速 3.86x"]
+    A6 --> A7["chat.py REPL"]
 
     B --> B1["InstructIE 171K 条"]
     B1 --> B2["6步数据Pipeline<br/>标准化→过滤→分层→派生→采样→转写"]
@@ -91,7 +87,7 @@ MicroLLM/
 ├── src/                       #   核心自实现 Python 包
 │   ├── model/                #   transformer.py, lora.py, kv_cache.py
 │   ├── tokenizer/            #   BPE tokenizer (训练 + 编码/解码)
-│   ├── training/             #   optimizer, scheduler, sft.py, data_loader, loss
+│   ├── training/             #   optimizer, scheduler, sft.py, dpo.py, dpo_dataset.py, data_loader, loss
 │   └── inference/            #   generate_text.py, prompting.py
 ├── scripts/                   #   可执行脚本入口
 │   ├── train_pretrain.py     #   预训练
@@ -147,12 +143,13 @@ pip install -e ".[all]"          # 推荐：包含全部依赖
 ```bash
 pytest tests/                                            # 跑通测试
 python scripts/train_pretrain.py --config configs/pretrain_smoke.json  # smoke 最小链路
+python -m scripts.train_dpo --config configs/dpo_smoke.json            # DPO smoke 测试
 ```
 
 <details>
 <summary><strong>数据准备</strong> （点击展开下载说明）</summary>
 
-仓库仅包含 `data/smoke/` 和 `data/sft_smoke/` 小型测试数据。完整训练数据需自行下载：
+仓库仅包含 `data/smoke/` 、 `data/sft_smoke/`  和 `data/dpo_smoke/`小型测试数据。完整训练数据需自行下载：
 
 **MiniMind** — 预训练 + SFT 对话数据（自研链路）
 
@@ -162,6 +159,14 @@ modelscope download --dataset gongjy/minimind_dataset pretrain_hq.jsonl
 ```
 来源：[jingyaogong/minimind](https://github.com/jingyaogong/minimind)
 
+**DPO 偏好对齐数据** — 强化学习训练（自研链路）
+
+```bash
+pip install datasets
+python -c "from datasets import load_dataset; load_dataset('Intel/orca_dpo_pairs')"
+```
+来源：[Intel/orca_dpo_pairs](https://huggingface.co/datasets/Intel/orca_dpo_pairs)
+
 **InstructIE** — 结构化信息抽取数据（Qwen 迁移链路）
 
 ```bash
@@ -170,6 +175,7 @@ python -c "from datasets import load_dataset; load_dataset('zjunlp/InstructIE')"
 ```
 来源：[zjunlp/InstructIE](https://huggingface.co/datasets/zjunlp/InstructIE)
 
+
 **基座模型**
 
 从 [HuggingFace](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct) 下载 `Qwen2.5-1.5B-Instruct` 至项目/model目录下。
@@ -177,37 +183,6 @@ python -c "from datasets import load_dataset; load_dataset('zjunlp/InstructIE')"
 > 详细处理流程见 [`data/README.md`](data/README.md)
 
 </details>
-
----
-
-## 后续计划
-
-在完成了 Pretraining (预训练) 和 SFT (指令微调) 之后，模型已经具备了基本的问答和指令遵循能力。为了进一步提升回复的自然度、安全性并与人类真实偏好对齐，本项目计划引入 **DPO (Direct Preference Optimization, 直接偏好优化)** 方案，补全大模型训练的最后一块拼图。
-
-相比于传统的 PPO (Proximal Policy Optimization)，DPO 无需在训练时同时加载和维护 Reward Model 和 Critic Model，极大地降低了显存占用和超参数调试难度，非常契合本项目的轻量级自研理念。
-
-以下是强化学习全链路的落地规划：
-
-### 1. 偏好数据采集闭环
-- [x] **开源偏好数据集接入**：在冷启动阶段，编写清洗脚本接入开源的 DPO 数据集（`Intel/orca_dpo_pairs`），快速验证算法闭环。
-
-### 2. DPO 核心算法与 Loss 实现  [正在进行中...]
-在 `src/training/` 和 `src/model/` 目录下补充 DPO 专属逻辑：
-- [ ] **双模型加载架构**：实现内存高效的双模型推断机制。加载冻结梯度的基座模型 (`reference_model`，即 SFT 模型) 和需要更新梯度的策略模型 (`policy_model`，结合现有的 LoRA 模块进行微调)。
-- [ ] **动态对数概率计算 (Log Probs)**：修改模型前向传播逻辑，使其能够同时输出 `chosen` 和 `rejected` 序列的 token-level 对数概率。
-- [ ] **DPO 损失函数 (`src/training/loss.py`)**：根据 DPO 论文公式实现基于 Sigmoid 交叉熵的损失函数，并引入超参数 $\beta$ (KL 散度惩罚项) 来控制对基座模型的偏离程度。
-
-### 3. 训练脚本与 DataLoader 扩展 [正在进行中...]
-扩展现有的训练基础设施，新增专用的 DPO 训练流：
-- [ ] **DPO 数据加载器 (`src/training/data_loader.py`)**：支持同时吐出 `chosen_ids` 和 `rejected_ids`，并处理不同长度序列的 Padding 问题。
-- [ ] **训练脚本 (`scripts/train_dpo.py`)**：参考已有的 `train_sft.py`，串联 DPO 数据集、双模型和 Loss 函数。
-- [ ] **监控与防过拟合 (Over-optimization)**：在训练过程中监控 Reward Margin（即 Chosen 与 Rejected 奖励得分的差值），结合已有的 Checkpoint 机制 (`src/training/checkpoint.py`) 实现早停策略，防止模型在单一偏向上“钻空子”。
-
-### 4. 评测与系统集成 [正在进行中...]
-验证对齐后模型的能力，并无缝接入现有的推理工程：
-- [ ] **对齐能力评测**：扩展 `scripts/run_eval_prompts.py`，专门针对安全性问题、极端边界场景（Corner Cases）以及拒答率进行评估。
-- [ ] **权重合并与导出**：训练完成后，将 DPO 阶段的 LoRA 权重与 Base 模型合并，通过 `scripts/export_final_model.py` 导出最终版本。
-- [ ] **推理无缝接入**：使用 `generate_text.py` 和 VLLM 部署脚本 (`scripts/serve_vllm.sh`) 对最终的 RL 模型进行性能和稳定性基准测试 (Benchmark)。
 
 ---
 
@@ -224,7 +199,7 @@ python -c "from datasets import load_dataset; load_dataset('zjunlp/InstructIE')"
 | [05-评测、验证与部署闭环](Readme/项目全景图/05-评测、验证与部署闭环.md) | 通用评测体系 / 结构化自动评测 / Alias 归一化 / vLLM benchmark |
 | [06-项目复盘与总结](Readme/项目全景图/06-项目复盘与总结.md) | 关键成果 / 8 个 Bug 清册 / 方法论收获 / 扩展方向 |
 
-> 核心代码解析：[transformer.py](Readme/核心代码解析/01-transformer.py%20模型主干.md) · [lora.py](Readme/核心代码解析/02-lora.py%20LoRA%20参数高效微调.md) · [sft.py](Readme/核心代码解析/03-sft.py%20SFT%20数据协议.md) · [data_loader & loss](Readme/核心代码解析/04-data_loader.py%20与%20loss.py.md) · [generate_text.py](Readme/核心代码解析/05-generate_text.py%20推理链路.md) · [chat.py](Readme/核心代码解析/06-chat.py%20多轮对话系统.md) · [train_qwen_lora.py](Readme/核心代码解析/07-train_qwen_lora.py%20Qwen%20迁移线核心.md) · [数据 pipeline 六步处理](Readme/核心代码解析/08-数据%20pipeline%20六步处理.md)
+> 核心代码解析：[transformer.py](Readme/核心代码解析/01-transformer.py%20模型主干.md) · [lora.py](Readme/核心代码解析/02-lora.py%20LoRA%20参数高效微调.md) · [sft.py](Readme/核心代码解析/03-sft.py%20SFT%20数据协议.md) · [data_loader & loss](Readme/核心代码解析/04-data_loader.py%20与%20loss.py.md) · [generate_text.py](Readme/核心代码解析/05-generate_text.py%20推理链路.md) · [chat.py](Readme/核心代码解析/06-chat.py%20多轮对话系统.md) · [train_qwen_lora.py](Readme/核心代码解析/07-train_qwen_lora.py%20Qwen%20迁移线核心.md) · [数据 pipeline 六步处理](Readme/核心代码解析/08-数据%20pipeline%20六步处理.md)  · [DPO 强化学习](Readme/核心代码解析/09-DPO%20直接偏好优化强化学习.md)
 
 ----
 
