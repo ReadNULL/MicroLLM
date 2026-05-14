@@ -6,7 +6,12 @@
 
 涵盖 tokenizer 训练、语料处理、pretrain、SFT、LoRA、推理优化、评测与部署，每一个环节亲手实现。
 
-[核心特色：自研链路 + Qwen 迁移](#核心成果 ) · [目录结构](#目录结构) · [快速开始](#快速开始) · [文档](#详细文档)
+```text
+预训练 -> SFT -> 强化学习
+  √      √     [进行中]
+```
+
+[核心特色：自研链路 + Qwen 迁移](#核心成果 ) · [目录结构](#目录结构) · [快速开始](#快速开始)  · [后续计划](#后续计划) · [文档](#详细文档)
 
 ---
 
@@ -31,7 +36,7 @@ flowchart TB
     A3 --> A4["Pretrain<br/>8层 RoPE+SwiGLU"]
     A4 --> A5["SFT / LoRA 微调<br/>0.83% 参数"]
     A5 --> A6["KV Cache 推理<br/>加速 3.86x"]
-    A6 --> A7["chat.py REPL"]
+    A6 --> A7["强化学习DPO<br/>[正在进行中...]"]
 
     B --> B1["InstructIE 171K 条"]
     B1 --> B2["6步数据Pipeline<br/>标准化→过滤→分层→派生→采样→转写"]
@@ -43,6 +48,7 @@ flowchart TB
     style A fill:#fef9e7,stroke:#f39c12,color:#2c3e50
     style B fill:#eafaf1,stroke:#27ae60,color:#2c3e50
     style A6 fill:#fdedec,stroke:#e74c3c,color:#2c3e50
+    style A7 fill:#ECF8F2,stroke:#42B983,color:#2c3e50
     style B6 fill:#fdedec,stroke:#e74c3c,color:#2c3e50
 ```
 
@@ -174,6 +180,34 @@ python -c "from datasets import load_dataset; load_dataset('zjunlp/InstructIE')"
 
 ---
 
+## 后续计划
+
+在完成了 Pretraining (预训练) 和 SFT (指令微调) 之后，模型已经具备了基本的问答和指令遵循能力。为了进一步提升回复的自然度、安全性并与人类真实偏好对齐，本项目计划引入 **DPO (Direct Preference Optimization, 直接偏好优化)** 方案，补全大模型训练的最后一块拼图。
+
+相比于传统的 PPO (Proximal Policy Optimization)，DPO 无需在训练时同时加载和维护 Reward Model 和 Critic Model，极大地降低了显存占用和超参数调试难度，非常契合本项目的轻量级自研理念。
+
+以下是强化学习全链路的落地规划：
+
+### 1. 偏好数据采集闭环
+- [x] **开源偏好数据集接入**：在冷启动阶段，编写清洗脚本接入开源的 DPO 数据集（`Intel/orca_dpo_pairs`），快速验证算法闭环。
+
+### 2. DPO 核心算法与 Loss 实现  [正在进行中...]
+在 `src/training/` 和 `src/model/` 目录下补充 DPO 专属逻辑：
+- [ ] **双模型加载架构**：实现内存高效的双模型推断机制。加载冻结梯度的基座模型 (`reference_model`，即 SFT 模型) 和需要更新梯度的策略模型 (`policy_model`，结合现有的 LoRA 模块进行微调)。
+- [ ] **动态对数概率计算 (Log Probs)**：修改模型前向传播逻辑，使其能够同时输出 `chosen` 和 `rejected` 序列的 token-level 对数概率。
+- [ ] **DPO 损失函数 (`src/training/loss.py`)**：根据 DPO 论文公式实现基于 Sigmoid 交叉熵的损失函数，并引入超参数 $\beta$ (KL 散度惩罚项) 来控制对基座模型的偏离程度。
+
+### 3. 训练脚本与 DataLoader 扩展 [正在进行中...]
+扩展现有的训练基础设施，新增专用的 DPO 训练流：
+- [ ] **DPO 数据加载器 (`src/training/data_loader.py`)**：支持同时吐出 `chosen_ids` 和 `rejected_ids`，并处理不同长度序列的 Padding 问题。
+- [ ] **训练脚本 (`scripts/train_dpo.py`)**：参考已有的 `train_sft.py`，串联 DPO 数据集、双模型和 Loss 函数。
+- [ ] **监控与防过拟合 (Over-optimization)**：在训练过程中监控 Reward Margin（即 Chosen 与 Rejected 奖励得分的差值），结合已有的 Checkpoint 机制 (`src/training/checkpoint.py`) 实现早停策略，防止模型在单一偏向上“钻空子”。
+
+### 4. 评测与系统集成 [正在进行中...]
+验证对齐后模型的能力，并无缝接入现有的推理工程：
+- [ ] **对齐能力评测**：扩展 `scripts/run_eval_prompts.py`，专门针对安全性问题、极端边界场景（Corner Cases）以及拒答率进行评估。
+- [ ] **权重合并与导出**：训练完成后，将 DPO 阶段的 LoRA 权重与 Base 模型合并，通过 `scripts/export_final_model.py` 导出最终版本。
+- [ ] **推理无缝接入**：使用 `generate_text.py` 和 VLLM 部署脚本 (`scripts/serve_vllm.sh`) 对最终的 RL 模型进行性能和稳定性基准测试 (Benchmark)。
 
 ## 详细文档
 
