@@ -203,6 +203,12 @@ python -c "from datasets import load_dataset; load_dataset('zjunlp/InstructIE')"
 
 ----
 
+## 引用
+
+本项目来源于：[jiaran-king/MicroLM: 基于轻量级 LLM 与 Qwen2.5-1.5B 两条主线，完成从数据处理、模型训练、参数高效微调，到评测验证与服务部署的端到端闭环。](https://github.com/jiaran-king/MicroLM)并在其基础上加入了DPO部分。
+
+---
+
 ## License
 
 MIT License. See [LICENSE](LICENSE).
